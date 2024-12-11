@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo List</title>
+</head>
+<body>
+<h1>Uploaded Photos</h1>
+
+<!-- Display photos -->
+<div th:if="${photos.size() > 0}">
+    <div th:each="photo : ${photos}">
+        <img th:src="@{/view/{filename}(filename=${photo.filename})}" alt="Uploaded Photo" style="width:200px; height:auto;">
+    </div>
+</div>
+
+<!-- Pagination controls -->
+<div th:if="${totalPages > 1}">
+    <ul>
+        <li th:if="${currentPage > 0}">
+            <a th:href="@{/photos(page=${currentPage - 1}, size=${#numbers.max(1, photos.size())})}">Previous</a>
+        </li>
+        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/photos(page=${i}, size=${#numbers.max(1, photos.size())})}"
+               th:text="${i + 1}"
+               th:classappend="${i == currentPage} ? 'active' : ''">Page</a>
+        </li>
+        <li th:if="${currentPage < totalPages - 1}">
+            <a th:href="@{/photos(page=${currentPage + 1}, size=${#numbers.max(1, photos.size())})}">Next</a>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>
