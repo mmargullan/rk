@@ -12,12 +12,9 @@ class User {
     var id: Long? = null
 
     @Column(unique = true)
-    var username: String? = null
+    var login: String? = null
 
     @Column
     var password: String? = null
-
-    @Column
-    var role: String? = null
 
 }
