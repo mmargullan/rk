@@ -2,7 +2,6 @@ package endterm.service
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import endterm.model.PersonId
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -51,6 +50,9 @@ class RestTemplateService(
             val jsonResponseID = Gson().fromJson(response.body, JsonObject::class.java)
             val personID = jsonResponseID["personID"]?.asLong
 
+            val cookies = authresponse.headers[HttpHeaders.SET_COOKIE]?.first()
+            print(cookies)
+
             personID
 
         }catch (e: Exception) {
@@ -59,6 +61,8 @@ class RestTemplateService(
         }
 
     }
+
+    fun grades(){}
 
 
     data class LoginRequest(val login: String, val password: String)

@@ -17,4 +17,7 @@ class User {
     @Column
     var password: String? = null
 
+    @Column
+    var personId: Long? = null
+
 }

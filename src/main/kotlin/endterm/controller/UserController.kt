@@ -22,4 +22,9 @@ class UserController(
         user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
+    @GetMapping("/getGrades")
+    fun getGrades(){
+
+    }
+
 }
