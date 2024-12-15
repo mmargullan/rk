@@ -42,8 +42,8 @@ class UserService (
 
     }
 
-    fun getGrades(personId: Long): ResponseEntity<Any> {
-        return restTemplateService.getGrades(personId)
+    fun getGrades(): ResponseEntity<Any> {
+        return restTemplateService.getGrades()
     }
 
 }

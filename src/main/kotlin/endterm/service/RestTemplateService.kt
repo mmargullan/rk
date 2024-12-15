@@ -67,7 +67,6 @@ class RestTemplateService(
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
 
             cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
-            println(cookie)
 
             val token = jsonResponse["auth_token"]?.asString
             return token
@@ -78,7 +77,7 @@ class RestTemplateService(
         }
     }
 
-    fun getGrades(personID: Long): ResponseEntity<Any> {
+    fun getGrades(): ResponseEntity<Any> {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {

@@ -29,7 +29,7 @@ class UserController(
 
     @GetMapping("/getGrades")
     fun getGrades(): ResponseEntity<Any> {
-        return userService.getGrades(personId = 37197)
+        return userService.getGrades()
     }
 
 }
