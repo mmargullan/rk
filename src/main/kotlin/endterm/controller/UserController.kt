@@ -1,39 +1,35 @@
 package endterm.controller
 
+import com.google.gson.JsonArray
+import endterm.model.Dto.HttpMessage
 import endterm.model.User
-import endterm.repository.UserRepository
+import endterm.service.RestTemplateService
 import endterm.service.UserService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
-import java.awt.print.Pageable
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/user")
 class UserController(
-    private val userService: UserService
+    private val restTemplateService: RestTemplateService,
+    private val userService: UserService,
 ) {
 
-    @PostMapping("/register")
-    fun register(@RequestBody user: User): ResponseEntity<Any> {
-        return userService.registerUser(user)
+    val logger = LoggerFactory.getLogger(UserController::class.java)
+
+    @PostMapping("/login")
+    fun loginPlatonus(@RequestBody user: User): HttpMessage? {
+        return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
-    @GetMapping("/all")
-    fun all(): List<User> {
-        return userService.getUsers()
-    }
-
-    @DeleteMapping("/delete")
-    fun delete(@RequestParam username: String) {
-        userService.deleteUser(username)
-    }
-
-    @GetMapping("/getPaginated")
-    fun getPaginated(page: Int, size: Int): Page<User> {
-        return userService.getPaginated(page, size)
+    @GetMapping("/getGrades")
+    fun getGrades(): ResponseEntity<String> {
+        return userService.getGrades(personId = 37197)
     }
 
 }

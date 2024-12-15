@@ -10,9 +10,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserRepository: JpaRepository<User, Long> {
 
-    fun findByUsername(username: String): User?
-
-    @Query("select u from User u")
-    fun findAllPaginated(pageable: Pageable): Page<User>
+    fun findByLogin(login: String): User?
 
 }

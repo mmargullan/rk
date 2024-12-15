@@ -1,53 +1,50 @@
 package endterm.service
 
+import com.google.gson.JsonArray
+import endterm.model.Dto.HttpMessage
 import endterm.model.User
 import endterm.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 
 @Service
 class UserService (
     @Autowired private val userRepository: UserRepository,
-    @Autowired private val passwordEncoder: PasswordEncoder
+    @Autowired private val restTemplateService: RestTemplateService
 ){
 
-    fun registerUser(user: User): ResponseEntity<Any> {
-        if (user.id?.let { userRepository.findById(it) } == null) {
-            user.password = passwordEncoder.encode(user.password)
-            user.role = "USER"
-            userRepository.save(user)
-            return ResponseEntity(HttpStatus.CREATED)
+    fun getAuthenticated(login: String, password: String): HttpMessage {
+
+        val token = restTemplateService.getToken(login, password)
+        val personId = token?.let { restTemplateService.getPersonId(it) }
+
+        if(personId == null){
+            throw HttpClientErrorException(HttpStatus.FORBIDDEN, "Bad Credentials!")
         }else{
-            return ResponseEntity(HttpStatus.BAD_REQUEST)
+            val user = User().apply {
+                this.login = login
+                this.password = password
+                this.personId = personId
+            }
+
+            if (user.login?.let { userRepository.findByLogin(it) } == null){
+                userRepository.save(user)
+            }
+
+            return HttpMessage().apply {
+                this.message = "Successfully logged in!"
+                this.status = "Success"
+            }
         }
+
     }
 
-    fun getUsers(): List<User> {
-        try {
-            return userRepository.findAll()
-        }
-        catch (e: Exception) {
-            e.printStackTrace()
-            return listOf()
-        }
-    }
-
-    fun deleteUser(username: String) {
-        val user = userRepository.findByUsername(username)
-        if (user != null) {
-            userRepository.delete(user)
-        }
-    }
-
-    fun getPaginated(page: Int, size: Int): Page<User> {
-        val pageable = PageRequest.of(page, size)
-        return userRepository.findAllPaginated(pageable)
+    fun getGrades(personId: Long): ResponseEntity<String> {
+        return restTemplateService.getGrades(personId)
     }
 
 }
+
