@@ -1,6 +1,6 @@
 package endterm.service
 
-import endterm.model.Dto.UserDto
+import endterm.model.Dto.HttpMessage
 import endterm.model.User
 import endterm.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,24 +14,32 @@ class UserService (
     @Autowired private val restTemplateService: RestTemplateService
 ){
 
-    fun getAuthenticated(login: String, password: String) {
-        if (userRepository.findByLogin(login) == null) {
+    fun getAuthenticated(login: String, password: String): HttpMessage {
+
+        val token = restTemplateService.getToken(login, password)
+        val personId = token?.let { restTemplateService.getPersonId(it) }
+
+        if(personId == null){
+            throw HttpClientErrorException(HttpStatus.FORBIDDEN, "Bad Credentials!")
+        }else{
             val user = User().apply {
                 this.login = login
                 this.password = password
-                this.personId = restTemplateService.authenticate(login, password)
+                this.personId = personId
             }
-            if (user.personId != null) {
+
+            if (user.login?.let { userRepository.findByLogin(it) } == null){
                 userRepository.save(user)
             }
-        }else{
-            val personId = restTemplateService.authenticate(login, password)
-            if (personId == null) {
-                throw HttpClientErrorException(HttpStatus.BAD_REQUEST)
+
+            return HttpMessage().apply {
+                this.message = "Successfully logged in!"
+                this.status = "Success"
             }
         }
 
     }
+
 
     }
 
