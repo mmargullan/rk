@@ -78,7 +78,7 @@ class RestTemplateService(
         }
     }
 
-    fun getGrades(personID: Long): ResponseEntity<String> {
+    fun getGrades(personID: Long): ResponseEntity<Any> {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -86,9 +86,7 @@ class RestTemplateService(
                 set("Cookie", cookie)
             }
             val request = HttpEntity("{}", headers)
-            val response = restTemplate.exchange(gradesUrl, HttpMethod.GET, request, String::class.java)
-            val jsonResponse = Gson().fromJson(response.body, JsonArray::class.java)
-            print(jsonResponse)
+            val response = restTemplate.exchange(gradesUrl, HttpMethod.GET, request, Any::class.java)
             return ResponseEntity.ok(response.body)
         }catch (e: Exception) {
             logger.error(e.message, e)

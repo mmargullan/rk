@@ -42,7 +42,7 @@ class UserService (
 
     }
 
-    fun getGrades(personId: Long): ResponseEntity<String> {
+    fun getGrades(personId: Long): ResponseEntity<Any> {
         return restTemplateService.getGrades(personId)
     }
 

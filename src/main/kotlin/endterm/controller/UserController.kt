@@ -28,7 +28,7 @@ class UserController(
     }
 
     @GetMapping("/getGrades")
-    fun getGrades(): ResponseEntity<String> {
+    fun getGrades(): ResponseEntity<Any> {
         return userService.getGrades(personId = 37197)
     }
 
