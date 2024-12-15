@@ -1,6 +1,8 @@
 package endterm.service
 
 import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -9,6 +11,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
@@ -46,6 +49,8 @@ class RestTemplateService(
 
     }
 
+    var cookie: String? = null
+
     fun getToken(login: String, password: String): String? {
         try {
             val restTemplate = RestTemplate()
@@ -61,7 +66,7 @@ class RestTemplateService(
             val response = restTemplate.exchange(loginUrl, HttpMethod.POST, request, String::class.java)
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
 
-            val cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
+            cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
             println(cookie)
 
             val token = jsonResponse["auth_token"]?.asString
@@ -70,6 +75,24 @@ class RestTemplateService(
         }catch (e: Exception) {
             logger.error(e.message, e)
             throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "Error while getting token")
+        }
+    }
+
+    fun getGrades(personID: Long): ResponseEntity<String> {
+        try {
+            val restTemplate = RestTemplate()
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                set("Cookie", cookie)
+            }
+            val request = HttpEntity("{}", headers)
+            val response = restTemplate.exchange(gradesUrl, HttpMethod.GET, request, String::class.java)
+            val jsonResponse = Gson().fromJson(response.body, JsonArray::class.java)
+            print(jsonResponse)
+            return ResponseEntity.ok(response.body)
+        }catch (e: Exception) {
+            logger.error(e.message, e)
+            throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while getting grades")
         }
     }
 

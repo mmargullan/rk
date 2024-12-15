@@ -1,9 +1,12 @@
 package endterm.controller
 
+import com.google.gson.JsonArray
 import endterm.model.Dto.HttpMessage
 import endterm.model.User
 import endterm.service.RestTemplateService
 import endterm.service.UserService
+import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,14 +20,16 @@ class UserController(
     private val userService: UserService,
 ) {
 
+    val logger = LoggerFactory.getLogger(UserController::class.java)
+
     @PostMapping("/login")
     fun loginPlatonus(@RequestBody user: User): HttpMessage? {
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
     @GetMapping("/getGrades")
-    fun getGrades(){
-
+    fun getGrades(): ResponseEntity<String> {
+        return userService.getGrades(personId = 37197)
     }
 
 }
