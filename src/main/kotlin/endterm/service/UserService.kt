@@ -1,5 +1,6 @@
 package endterm.service
 
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import endterm.model.Dto.HttpMessage
 import endterm.model.User
@@ -48,7 +49,8 @@ class UserService (
 
     fun getInfo(login: String, password: String): ResponseEntity<Any> {
         val token = restTemplateService.getToken(login, password)
-        return restTemplateService.getInformation(token)
+        val response = restTemplateService.getInformation(token)
+        return response
     }
 
 }
