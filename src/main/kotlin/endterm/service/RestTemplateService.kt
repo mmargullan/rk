@@ -20,7 +20,8 @@ import org.springframework.web.client.RestTemplate
 class RestTemplateService(
     @Value("\${platonus.login.url}") val loginUrl: String,
     @Value("\${platonus.personID.url}") val personIDurl: String,
-    @Value("\${platonus.grades.url}") val gradesUrl: String
+    @Value("\${platonus.grades.url}") val gradesUrl: String,
+    @Value("\${platonus.userInfo.url}") val userInfoUrl: String
 ) {
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
@@ -93,7 +94,25 @@ class RestTemplateService(
         }
     }
 
+    fun getInformation(token: String?): ResponseEntity<Any> {
+        try{
+            val restTemplate = RestTemplate()
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                set("Token", token)
+                set("Cookie", cookie)
+            }
+            val request = HttpEntity("{}", headers)
+            val response = restTemplate.exchange(userInfoUrl, HttpMethod.POST, request, Any::class.java)
+            return ResponseEntity.ok(response.body)
+        }catch (e: Exception) {
+            logger.error(e.message, e)
+            throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while getting information")
+        }
+    }
+
 
     data class LoginRequest(val login: String, val password: String)
+
 
 }

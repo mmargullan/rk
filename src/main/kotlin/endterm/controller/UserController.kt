@@ -24,4 +24,10 @@ class UserController(
         return userService.getGrades()
     }
 
+    @CrossOrigin(origins = ["*"])
+    @GetMapping("/getUserInfo")
+    fun getUserInfo(@RequestBody user: User): ResponseEntity<Any>? {
+        return user.login?.let { user.password?.let { it1 -> userService.getInfo(it, it1) } }
+    }
+
 }
