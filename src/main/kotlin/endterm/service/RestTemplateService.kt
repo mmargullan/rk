@@ -20,7 +20,8 @@ import org.springframework.web.client.RestTemplate
 class RestTemplateService(
     @Value("\${platonus.login.url}") val loginUrl: String,
     @Value("\${platonus.personID.url}") val personIDurl: String,
-    @Value("\${platonus.grades.url}") val gradesUrl: String
+    @Value("\${platonus.grades.url}") val gradesUrl: String,
+    @Value("\${platonus.userInfo.url}") val userInfoUrl: String
 ) {
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
@@ -67,7 +68,6 @@ class RestTemplateService(
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
 
             cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
-            println(cookie)
 
             val token = jsonResponse["auth_token"]?.asString
             return token
@@ -78,7 +78,7 @@ class RestTemplateService(
         }
     }
 
-    fun getGrades(personID: Long): ResponseEntity<String> {
+    fun getGrades(): ResponseEntity<Any> {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -86,9 +86,7 @@ class RestTemplateService(
                 set("Cookie", cookie)
             }
             val request = HttpEntity("{}", headers)
-            val response = restTemplate.exchange(gradesUrl, HttpMethod.GET, request, String::class.java)
-            val jsonResponse = Gson().fromJson(response.body, JsonArray::class.java)
-            print(jsonResponse)
+            val response = restTemplate.exchange(gradesUrl, HttpMethod.GET, request, Any::class.java)
             return ResponseEntity.ok(response.body)
         }catch (e: Exception) {
             logger.error(e.message, e)
@@ -96,7 +94,25 @@ class RestTemplateService(
         }
     }
 
+    fun getInformation(token: String?): ResponseEntity<Any> {
+        try{
+            val restTemplate = RestTemplate()
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                set("Token", token)
+                set("Cookie", cookie)
+            }
+            val request = HttpEntity("{}", headers)
+            val response = restTemplate.exchange(userInfoUrl, HttpMethod.POST, request, Any::class.java)
+            return ResponseEntity.ok(response.body)
+        }catch (e: Exception) {
+            logger.error(e.message, e)
+            throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while getting information")
+        }
+    }
+
 
     data class LoginRequest(val login: String, val password: String)
+
 
 }

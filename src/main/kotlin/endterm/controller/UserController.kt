@@ -1,35 +1,33 @@
 package endterm.controller
 
-import com.google.gson.JsonArray
 import endterm.model.Dto.HttpMessage
 import endterm.model.User
-import endterm.service.RestTemplateService
 import endterm.service.UserService
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user")
 class UserController(
-    private val restTemplateService: RestTemplateService,
     private val userService: UserService,
 ) {
 
-    val logger = LoggerFactory.getLogger(UserController::class.java)
-
+    @CrossOrigin(origins = ["*"])
     @PostMapping("/login")
     fun loginPlatonus(@RequestBody user: User): HttpMessage? {
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
+    @CrossOrigin(origins = ["*"])
     @GetMapping("/getGrades")
-    fun getGrades(): ResponseEntity<String> {
-        return userService.getGrades(personId = 37197)
+    fun getGrades(): ResponseEntity<Any> {
+        return userService.getGrades()
+    }
+
+    @CrossOrigin(origins = ["*"])
+    @GetMapping("/getUserInfo")
+    fun getUserInfo(@RequestBody user: User): ResponseEntity<Any>? {
+        return user.login?.let { user.password?.let { it1 -> userService.getInfo(it, it1) } }
     }
 
 }
