@@ -27,7 +27,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	implementation("com.google.code.gson:gson:2.8.8")
+	implementation("com.google.code.gson:gson:2.8.9")
 }
 
 tasks.withType<KotlinCompile> {
