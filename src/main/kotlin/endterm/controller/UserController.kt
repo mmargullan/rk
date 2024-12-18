@@ -8,23 +8,21 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = ["*"])
 class UserController(
     private val userService: UserService,
 ) {
 
-    @CrossOrigin(origins = ["*"])
     @PostMapping("/login")
     fun loginPlatonus(@RequestBody user: User): HttpMessage? {
         return user.login?.let { user.password?.let { it1 -> userService.getAuthenticated(it, it1) } }
     }
 
-    @CrossOrigin(origins = ["*"])
     @GetMapping("/getGrades")
     fun getGrades(): ResponseEntity<Any> {
         return userService.getGrades()
     }
 
-    @CrossOrigin(origins = ["*"])
     @GetMapping("/getUserInfo")
     fun getUserInfo(@RequestBody user: User): ResponseEntity<Any>? {
         return user.login?.let { user.password?.let { it1 -> userService.getInfo(it, it1) } }
