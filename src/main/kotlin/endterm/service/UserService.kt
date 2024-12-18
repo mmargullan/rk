@@ -47,9 +47,8 @@ class UserService (
         return restTemplateService.getGrades()
     }
 
-    fun getInfo(login: String, password: String): ResponseEntity<Any> {
-        val token = restTemplateService.getToken(login, password)
-        val response = restTemplateService.getInformation(token)
+    fun getInfo(): ResponseEntity<Any> {
+        val response = restTemplateService.getInformation()
         return response
     }
 

@@ -24,8 +24,8 @@ class UserController(
     }
 
     @GetMapping("/getUserInfo")
-    fun getUserInfo(@RequestBody user: User): ResponseEntity<Any>? {
-        return user.login?.let { user.password?.let { it1 -> userService.getInfo(it, it1) } }
+    fun getUserInfo(): ResponseEntity<Any>? {
+        return userService.getInfo()
     }
 
 }

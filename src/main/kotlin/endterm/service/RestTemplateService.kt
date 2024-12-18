@@ -19,6 +19,9 @@ class RestTemplateService(
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
 
+    var cookie: String? = null
+    var localtoken: String? = null
+
     fun getPersonId(token: String): Long? {
 
         return try {
@@ -43,8 +46,6 @@ class RestTemplateService(
 
     }
 
-    var cookie: String? = null
-
     fun getToken(login: String, password: String): String? {
         try {
             val restTemplate = RestTemplate()
@@ -63,6 +64,7 @@ class RestTemplateService(
             cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
 
             val token = jsonResponse["auth_token"]?.asString
+            localtoken = token
             return token
 
         }catch (e: Exception) {
@@ -87,12 +89,12 @@ class RestTemplateService(
         }
     }
 
-    fun getInformation(token: String?): ResponseEntity<Any> {
+    fun getInformation(): ResponseEntity<Any> {
         try{
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
                 contentType = MediaType.APPLICATION_JSON
-                set("Token", token)
+                set("Token", localtoken)
                 set("Cookie", cookie)
             }
             val request = HttpEntity("{}", headers)
