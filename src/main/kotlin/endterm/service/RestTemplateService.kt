@@ -1,22 +1,15 @@
 package endterm.service
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
-import org.springframework.stereotype.Service
+import org.springframework.http.*
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
-@Service
+@Component
 class RestTemplateService(
     @Value("\${platonus.login.url}") val loginUrl: String,
     @Value("\${platonus.personID.url}") val personIDurl: String,
@@ -25,6 +18,9 @@ class RestTemplateService(
 ) {
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
+
+    var cookie: String? = null
+    var localtoken: String? = null
 
     fun getPersonId(token: String): Long? {
 
@@ -50,8 +46,6 @@ class RestTemplateService(
 
     }
 
-    var cookie: String? = null
-
     fun getToken(login: String, password: String): String? {
         try {
             val restTemplate = RestTemplate()
@@ -70,6 +64,7 @@ class RestTemplateService(
             cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
 
             val token = jsonResponse["auth_token"]?.asString
+            localtoken = token
             return token
 
         }catch (e: Exception) {
@@ -94,17 +89,23 @@ class RestTemplateService(
         }
     }
 
-    fun getInformation(token: String?): ResponseEntity<Any> {
+    fun getInformation(): ResponseEntity<Any> {
         try{
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
                 contentType = MediaType.APPLICATION_JSON
-                set("Token", token)
+                set("Token", localtoken)
                 set("Cookie", cookie)
             }
             val request = HttpEntity("{}", headers)
-            val response = restTemplate.exchange(userInfoUrl, HttpMethod.POST, request, Any::class.java)
-            return ResponseEntity.ok(response.body)
+            val response = restTemplate.exchange(userInfoUrl, HttpMethod.POST, request, String::class.java)
+            val userInfo: UserResponse = Gson().fromJson(response.body, UserResponse::class.java)
+            val responseData = mutableMapOf<String, Any>()
+            responseData["fullname"] = "${userInfo.student.lastnameEN} ${userInfo.student.firstnameEN}"
+            responseData["gpa"] = userInfo.student.GPA
+            responseData["specialization"] = userInfo.student.specializationNameEn
+            responseData["course"] = userInfo.student.courseNumber
+            return ResponseEntity.ok(responseData)
         }catch (e: Exception) {
             logger.error(e.message, e)
             throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while getting information")
@@ -114,5 +115,12 @@ class RestTemplateService(
 
     data class LoginRequest(val login: String, val password: String)
 
+    data class Student(
+        val lastnameEN: String,
+        val firstnameEN: String,
+        val GPA: Float,
+        val specializationNameEn: String,
+        val courseNumber: Long)
+    data class UserResponse(val student: Student)
 
 }
