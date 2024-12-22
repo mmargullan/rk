@@ -16,11 +16,12 @@ class RestTemplateService(
     @Value("\${platonus.grades.url}") val gradesUrl: String,
     @Value("\${platonus.userInfo.url}") val userInfoUrl: String
 ) {
+    data class AuthResponse(
+        val token: String?,
+        val cookie: String?
+    )
 
     val logger = LoggerFactory.getLogger(RestTemplateService::class.java)
-
-    var cookie: String? = null
-    var localtoken: String? = null
 
     fun getPersonId(token: String): Long? {
 
@@ -46,7 +47,7 @@ class RestTemplateService(
 
     }
 
-    fun getToken(login: String, password: String): String? {
+    fun getToken(login: String, password: String): AuthResponse {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -61,11 +62,10 @@ class RestTemplateService(
             val response = restTemplate.exchange(loginUrl, HttpMethod.POST, request, String::class.java)
             val jsonResponse = Gson().fromJson(response.body, JsonObject::class.java)
 
-            cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
-
+            val cookie = response.headers[HttpHeaders.SET_COOKIE]?.first()
             val token = jsonResponse["auth_token"]?.asString
-            localtoken = token
-            return token
+
+            return AuthResponse(token, cookie)
 
         }catch (e: Exception) {
             logger.error(e.message, e)
@@ -73,7 +73,7 @@ class RestTemplateService(
         }
     }
 
-    fun getGrades(): ResponseEntity<Any> {
+    fun getGrades(cookie: String): ResponseEntity<Any> {
         try {
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
@@ -89,7 +89,7 @@ class RestTemplateService(
         }
     }
 
-    fun getInformation(): ResponseEntity<Any> {
+    fun getInformation(localtoken: String, cookie: String): ResponseEntity<Any> {
         try{
             val restTemplate = RestTemplate()
             val headers = HttpHeaders().apply {
