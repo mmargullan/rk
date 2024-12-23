@@ -12,12 +12,14 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 @EnableWebSecurity
 class WebSecurityConfig(
     private val jwtAuthorizationFilter: JwtAuthorizationFilter,
-    private val jwtUserDetailsService: UserDetailsService
+    private val jwtUserDetailsService: UserDetailsService,
+    private val corsConfigurer: WebMvcConfigurer
 ): WebSecurityConfigurerAdapter() {
 
     override fun configure(auth: AuthenticationManagerBuilder) {
@@ -37,6 +39,8 @@ class WebSecurityConfig(
 
     override fun configure(http: HttpSecurity) {
         http.csrf().disable()
+            .cors()
+            .and()
             .authorizeHttpRequests()
             .antMatchers("/user/login").permitAll()
             .anyRequest().authenticated()
